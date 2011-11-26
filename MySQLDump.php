@@ -23,7 +23,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	var $database = null;
+       protected $database = null;
 
 	/**
 	* @access private
@@ -50,7 +50,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	var $isWritten = false;
+	protected  $isWritten = false;
 
 	/**
 	* Class constructor
