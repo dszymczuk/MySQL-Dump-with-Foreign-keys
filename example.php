@@ -14,11 +14,16 @@ mysql_query("SET NAMES 'utf8' COLLATE 'utf8_bin'");
 require_once('FKMySQLDump.php');
 
 //Creates a new instance of FKMySQLDump: it exports a compressed and base-16 file
-$dumper = new FKMySQLDump($dbname,'filename.sql',false,false);
+/*$dumper = new FKMySQLDump($dbname,'filename.sql',false,false);
 $dumper->getForeignKeys();
-$dumper->doDump();
+$dumper->dropKeys();
+//$dumper->getForeignKeysRules();
+$dumper->doFKDump();
+*/
 
-
+$dumper = new FKMySQLDump($dbname,'filenamedata.sql',false,false);
+$dumper->doFKDump();
+//$dumper->getDatabaseData();
 //$dumper->getForeignKeys();
 
 //$dumper->saveToFile();

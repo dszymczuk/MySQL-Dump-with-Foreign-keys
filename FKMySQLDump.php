@@ -52,7 +52,7 @@ class FKMySQLDump extends MySQLDump{
     /**
     * Writes to file the selected database dump
     */
-    function doDump() {
+    function doFKDump() {
         parent::doDump();
         //echo $this->_fileName;
         $sql_file = file_get_contents($this->_fileName);
@@ -72,6 +72,10 @@ class FKMySQLDump extends MySQLDump{
     
     /**
      * Gets Foreign Keys names to array
+     *
+     * Select data from Information Schema
+     *
+     * @return void
      */
     public function getForeignKeys() {
         $sql = "select * from information_schema.TABLE_CONSTRAINTS  
@@ -84,6 +88,62 @@ class FKMySQLDump extends MySQLDump{
         }
         
         var_dump($this->_fk_names);
+    }
+
+    public function getForeignKeysRules(){
+        /*$fk_name = $this->_fk_names[0];
+        echo $fk_name;*/
+        $FK_to_sql_file = "";
+        foreach($this->_fk_names as $fk_name){
+            //echo $fk_name."<br />";
+
+            /*$sql = "select * from information_schema.REFERENTIAL_CONSTRAINTS
+                    where CONSTRAINT_SCHEMA = '{$this->_dbname}'
+                    and CONSTRAINT_NAME = '{$fk_name}'";*/
+
+            $sql = "select KEY_COLUMN_USAGE.TABLE_NAME, KEY_COLUMN_USAGE.CONSTRAINT_NAME, COLUMN_NAME,
+                    REFERENCED_COLUMN_NAME, KEY_COLUMN_USAGE.REFERENCED_TABLE_NAME, UPDATE_RULE, DELETE_RULE
+                    from information_schema.KEY_COLUMN_USAGE, information_schema.REFERENTIAL_CONSTRAINTS
+                    where KEY_COLUMN_USAGE.CONSTRAINT_SCHEMA = '{$this->_dbname}'
+                    and KEY_COLUMN_USAGE.CONSTRAINT_NAME = '{$fk_name}'
+                    and KEY_COLUMN_USAGE.CONSTRAINT_NAME = REFERENTIAL_CONSTRAINTS.CONSTRAINT_NAME
+                    and KEY_COLUMN_USAGE.CONSTRAINT_SCHEMA = REFERENTIAL_CONSTRAINTS.CONSTRAINT_SCHEMA";
+
+            $result = mysql_query($sql);
+
+            while($row = mysql_fetch_assoc($result)){
+                echo $row['CONSTRAINT_NAME']."<br />";
+                $FK_to_sql_file .= "ALTER TABLE {$row['REFERENCED_TABLE_NAME']}
+                          add CONSTRAINT {$row['CONSTRAINT_NAME']} FOREIGN KEY ({$row['COLUMN_NAME']})
+                          REFERENCES {$row['REFERENCED_TABLE_NAME']} ({$row['REFERENCED_COLUMN_NAME']})
+                          ON DELETE {$row['DELETE_RULE']} ON UPDATE {$row['UPDATE_RULE']};";
+                $FK_to_sql_file .= "<br/><br/>";
+
+                //echo "FK name: ".$fk_name." Table name: ".$row['TABLE_NAME']." UR: ".$row['UPDATE_RULE']."<br />";
+                //$FK_to_sql_file = "a";
+            }
+        }
+        echo $FK_to_sql_file;
+    }
+
+    public function dropKeys()
+    {
+        $sql = "show TABLES from {$this->_dbname}";
+        $result = mysql_query($sql);
+        while($row = mysql_fetch_assoc($result)) {
+
+            //$sql_index = "show index from `".$row['Tables_in_'.$this->_dbname]."`";
+
+            echo "Nazwa tabelki to: ".$row['Tables_in_'.$this->_dbname]."<br/>";
+            $sql_index = "show index from `".$row['Tables_in_'.$this->_dbname]."` where Key_name != 'primary'
+                        and Key_name not like '%unique' and Key_name != 'Full text' ";
+            $result_index = mysql_query($sql_index);
+            while($row_index = mysql_fetch_assoc($result_index)){
+                echo $row_index['Key_name']."<br />";
+            }
+
+            //echo $row['Tables_in_'.$this->_dbname]."<br />";
+        }
     }
 
 }
