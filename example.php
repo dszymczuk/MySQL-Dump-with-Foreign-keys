@@ -2,8 +2,8 @@
 //MySQL connection parameters
 $dbhost = 'localhost';
 $dbuser = 'root';
-$dbpsw = 'qweasd';
-$dbname = 'komunikator_test';
+$dbpsw = '';
+$dbname = '';
 
 //Connects to mysql server
 $connessione = @mysql_connect($dbhost,$dbuser,$dbpsw);
