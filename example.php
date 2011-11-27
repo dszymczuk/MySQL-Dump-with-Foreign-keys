@@ -8,7 +8,7 @@ $dbname = 'komunikator_test';
 //Connects to mysql server
 $connessione = @mysql_connect($dbhost,$dbuser,$dbpsw);
 mysql_query("SET CHARSET utf8");
-mysql_query("SET NAMES 'utf8' COLLATE 'utf8_bin'");
+mysql_query("SET NAMES 'utf8' COLLATE 'utf8_general_ci'");
 
 //Includes class
 require_once('FKMySQLDump.php');
@@ -21,8 +21,15 @@ $dumper->dropKeys();
 $dumper->doFKDump();
 */
 
-$dumper = new FKMySQLDump($dbname,'filenamedataFK.sql',false,false);
+$dumper = new FKMySQLDump($dbname,'ostateczne.sql',false,false);
 $dumper->doFKDump();
+ 
+/*$file = file_get_contents("filenamedataFKu2.sql");
+$file = str_replace("\\r", "", $file);
+file_put_contents("filenamedataFKu2.sql", $file);*/
+
+
+
 //$dumper->getDatabaseData();
 /*$dumper->getForeignKeys();
 $dumper->getForeignKeysRules();*/

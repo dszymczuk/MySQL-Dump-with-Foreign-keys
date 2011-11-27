@@ -9,6 +9,7 @@
  * 
  * @name FKMySQLDump
  * @author Damian Szymczuk - damian.szymczuk@gmail.com
+ * @link http://dszymczuk.pl
  * @version 1.0 - 27/11/2011
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
@@ -61,12 +62,7 @@ class FKMySQLDump extends MySQLDump{
         $sql_file .= "-- ------------\n";
         $sql_file .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
         $sql_file .= $this->getForeignKeysRules();
-        $sql_file .= "SET FOREIGN_KEY_CHECKS = 1;";
-
-        /*$cur = file_get_contents($this->_fileName);
-        $cur .= "Dopisuje linijkę\n";
-        $cur .= "I kolejna linijkę\n";
-        $cur .= "I jeszcze jedna linijkę\n";*/
+        $sql_file .= "SET FOREIGN_KEY_CHECKS = 1;\n\n";
         file_put_contents($this->_fileName,$sql_file);
     }
     
@@ -74,21 +70,18 @@ class FKMySQLDump extends MySQLDump{
     /**
      * Gets Foreign Keys names to array
      *
-     * Select data from Information Schema
+     * Select CONSTRAINT_NAME from Information Schema
      *
      * @return void
      */
     public function getForeignKeys() {
-        $sql = "select * from information_schema.TABLE_CONSTRAINTS  
+        $sql = "select * from information_schema.TABLE_CONSTRAINTS
             where  CONSTRAINT_TYPE = 'foreign key' 
             and CONSTRAINT_SCHEMA ='{$this->_dbname}'";
-            //echo $sql;
         $result = mysql_query($sql);
         while($row = mysql_fetch_assoc($result)) {
             array_push($this->_fk_names, $row['CONSTRAINT_NAME']);
         }
-        
-        //var_dump($this->_fk_names);
     }
 
     public function getForeignKeysRules(){
@@ -120,7 +113,7 @@ class FKMySQLDump extends MySQLDump{
 
 
 
-                $FK_to_sql_file .= "\n\n";
+                $FK_to_sql_file .= "\r\n\r\n";
 
                 //echo "FK name: ".$fk_name." Table name: ".$row['TABLE_NAME']." UR: ".$row['UPDATE_RULE']."<br />";
                 //$FK_to_sql_file = "a";
