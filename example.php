@@ -21,11 +21,11 @@ $dumper->dropKeys();
 $dumper->doFKDump();
 */
 
-$dumper = new FKMySQLDump($dbname,'filenamedata.sql',false,false);
+$dumper = new FKMySQLDump($dbname,'filenamedataFK.sql',false,false);
 $dumper->doFKDump();
 //$dumper->getDatabaseData();
-//$dumper->getForeignKeys();
-
+/*$dumper->getForeignKeys();
+$dumper->getForeignKeysRules();*/
 //$dumper->saveToFile();
 //
 //

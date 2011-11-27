@@ -54,13 +54,14 @@ class FKMySQLDump extends MySQLDump{
     */
     function doFKDump() {
         parent::doDump();
-        //echo $this->_fileName;
+        $this->getForeignKeys();
         $sql_file = file_get_contents($this->_fileName);
         $sql_file .= "--------------\n";
         $sql_file .= "--FOREIGN KEYS\n";
         $sql_file .= "--------------\n";
-        $sql_file .= "SET FOREIGN_KEY_CHECKS = 0\n\n";
-        $sql_file .= "SET FOREIGN_KEY_CHECKS = 1";
+        $sql_file .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
+        $sql_file .= $this->getForeignKeysRules();
+        $sql_file .= "SET FOREIGN_KEY_CHECKS = 1;";
 
         /*$cur = file_get_contents($this->_fileName);
         $cur .= "Dopisuje linijkę\n";
@@ -81,13 +82,13 @@ class FKMySQLDump extends MySQLDump{
         $sql = "select * from information_schema.TABLE_CONSTRAINTS  
             where  CONSTRAINT_TYPE = 'foreign key' 
             and CONSTRAINT_SCHEMA ='{$this->_dbname}'";
-            echo $sql;
+            //echo $sql;
         $result = mysql_query($sql);
         while($row = mysql_fetch_assoc($result)) {
             array_push($this->_fk_names, $row['CONSTRAINT_NAME']);
         }
         
-        var_dump($this->_fk_names);
+        //var_dump($this->_fk_names);
     }
 
     public function getForeignKeysRules(){
@@ -112,21 +113,23 @@ class FKMySQLDump extends MySQLDump{
             $result = mysql_query($sql);
 
             while($row = mysql_fetch_assoc($result)){
-                echo $row['CONSTRAINT_NAME']."<br />";
-                $FK_to_sql_file .= "ALTER TABLE {$row['REFERENCED_TABLE_NAME']}
-                          add CONSTRAINT {$row['CONSTRAINT_NAME']} FOREIGN KEY ({$row['COLUMN_NAME']})
-                          REFERENCES {$row['REFERENCED_TABLE_NAME']} ({$row['REFERENCED_COLUMN_NAME']})
-                          ON DELETE {$row['DELETE_RULE']} ON UPDATE {$row['UPDATE_RULE']};";
-                $FK_to_sql_file .= "<br/><br/>";
+                //echo $row['CONSTRAINT_NAME']."<br />";
+                $FK_to_sql_file .= "ALTER TABLE `".$row['TABLE_NAME']."` ADD CONSTRAINT `".$row['CONSTRAINT_NAME']."` FOREIGN KEY (`".$row['COLUMN_NAME']."`) REFERENCES `".$row['REFERENCED_TABLE_NAME']."` (`".$row['REFERENCED_COLUMN_NAME']."`) ON DELETE {$row['DELETE_RULE']} ON UPDATE {$row['UPDATE_RULE']};";
+                //$FK_to_sql_file .= "<br/><br/>";
+
+
+
+
+                $FK_to_sql_file .= "\n\n";
 
                 //echo "FK name: ".$fk_name." Table name: ".$row['TABLE_NAME']." UR: ".$row['UPDATE_RULE']."<br />";
                 //$FK_to_sql_file = "a";
             }
         }
-        echo $FK_to_sql_file;
+        return $FK_to_sql_file;
     }
 
-    public function dropKeys()
+    /*public function dropKeys()
     {
         $sql = "show TABLES from {$this->_dbname}";
         $result = mysql_query($sql);
@@ -144,6 +147,6 @@ class FKMySQLDump extends MySQLDump{
 
             //echo $row['Tables_in_'.$this->_dbname]."<br />";
         }
-    }
+    }*/
 
 }
