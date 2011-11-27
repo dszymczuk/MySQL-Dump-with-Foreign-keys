@@ -17,7 +17,7 @@ require_once('FKMySQLDump.php');
 
 
 //Creates a new instance of FKMySQLDump: it exports without compress and base-16 file
-$dumper = new FKMySQLDump($dbname,'ostateczne.sql',false,false);
+$dumper = new FKMySQLDump($dbname,'fk_dump.sql',false,false);
 
 //Make dump
 $dumper->doFKDump();
