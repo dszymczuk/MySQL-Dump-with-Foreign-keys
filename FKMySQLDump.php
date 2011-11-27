@@ -56,9 +56,9 @@ class FKMySQLDump extends MySQLDump{
         parent::doDump();
         $this->getForeignKeys();
         $sql_file = file_get_contents($this->_fileName);
-        $sql_file .= "--------------\n";
-        $sql_file .= "--FOREIGN KEYS\n";
-        $sql_file .= "--------------\n";
+        $sql_file .= "-- ------------\n";
+        $sql_file .= "-- FOREIGN KEYS\n";
+        $sql_file .= "-- ------------\n";
         $sql_file .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
         $sql_file .= $this->getForeignKeysRules();
         $sql_file .= "SET FOREIGN_KEY_CHECKS = 1;";
