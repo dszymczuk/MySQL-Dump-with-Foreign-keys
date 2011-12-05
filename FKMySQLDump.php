@@ -53,7 +53,7 @@ class FKMySQLDump extends MySQLDump{
     /**
      * Writes to file the selected database dump
      * 
-     * @return void
+     * @return bool
      */
     function doFKDump() {
         parent::doDump();
@@ -66,6 +66,7 @@ class FKMySQLDump extends MySQLDump{
         $sql_file .= $this->getForeignKeysRules();
         $sql_file .= "SET FOREIGN_KEY_CHECKS = 1;\n\n";
         file_put_contents($this->_fileName,$sql_file);
+		return true;
     }
     
     
