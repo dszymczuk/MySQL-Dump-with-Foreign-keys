@@ -144,10 +144,10 @@ class MySQLDump {
 			return false;
 		while ( $record = mysql_fetch_assoc($records) ) {
 			$structure .= '`'.$record['Field'].'` '.$record['Type'];
-			if ( !empty($record['Default']) )
-				$structure .= ' DEFAULT \''.$record['Default'].'\'';
 			if ( @strcmp($record['Null'],'YES') != 0 )
 				$structure .= ' NOT NULL';
+			if ( !empty($record['Default']) || @strcmp($record['Null'],'YES') == 0) 
+				$structure .= ' DEFAULT '.(is_null($record['Default']) ? 'NULL' : "'{$record['Default']}'");
 			if ( !empty($record['Extra']) )
 				$structure .= ' '.$record['Extra'];
 			$structure .= ",\n";
