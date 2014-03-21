@@ -221,6 +221,8 @@ class MySQLDump {
 					$field_name = @mysql_field_name($records, $j);
 					if ( $hexField[$j] && (@strlen($record[$field_name]) > 0) )
 						$data .= "0x".$record[$field_name];
+					else if ( is_null($record[$field_name]) )
+						$data .= "NULL";
 					else
 						$data .= "'".@str_replace('\"','"',@mysql_escape_string($record[$field_name]))."'";
 					$data .= ',';
