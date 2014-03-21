@@ -219,7 +219,7 @@ class MySQLDump {
 				$data .= ' (';
 				for ($j = 0; $j < $num_fields; $j++) {
 					$field_name = @mysql_field_name($records, $j);
-					if ( $hexField[$j] && (@strlen($record[$field_name]) > 0) )
+					if ( isset($hexField[$j]) && $hexField[$j] && (@strlen($record[$field_name]) > 0) )
 						$data .= "0x".$record[$field_name];
 					else if ( is_null($record[$field_name]) )
 						$data .= "NULL";
