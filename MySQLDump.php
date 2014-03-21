@@ -272,10 +272,12 @@ class MySQLDump {
 	/**
 	* Writes to file the selected database dump
 	*/
-	function doDump() {
+	function doDump($params = array()) {
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 0;\n\n");
-		$this->getDatabaseStructure();
-		$this->getDatabaseData($this->hexValue);
+		if (!isset($params['skip_structure']))
+			$this->getDatabaseStructure();
+		if (!isset($params['skip_data']))
+			$this->getDatabaseData($this->hexValue);
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 1;\n\n");
 		$this->closeFile($this->file);
 		return true;
