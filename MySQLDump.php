@@ -160,7 +160,7 @@ class MySQLDump {
 
 		//Save table engine
 		$records = @mysql_query("SHOW TABLE STATUS LIKE '".$table."'");
-		echo $query;
+		// echo $query; - ???
 		if ( $record = @mysql_fetch_assoc($records) ) {
 			if ( !empty($record['Engine']) )
 				$structure .= ' ENGINE='.$record['Engine'];
@@ -230,7 +230,7 @@ class MySQLDump {
 				$data = @substr($data,0,-1).")";
 				$data .= ( $i < ($num_rows-1) ) ? ',' : ';';
 				$data .= "\n";
-				//if data in greather than 1MB save
+				//if data in greater than 1MB save
 				if (strlen($data) > 1048576) {
 					$this->saveToFile($this->file,$data);
 					$data = '';
@@ -249,6 +249,7 @@ class MySQLDump {
 		$records = @mysql_query('SHOW TABLES');
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
+		$structure = '';
 		while ( $record = @mysql_fetch_row($records) ) {
 			$structure .= $this->getTableStructure($record[0]);
 		}
@@ -335,7 +336,7 @@ class MySQLDump {
 			$primary .= ")";
 			$sqlKeyStatement .= $primary;
 		}
-		if (is_array($unique)) {
+		if (isset($unique) && is_array($unique)) {
 			foreach ($unique as $keyName => $keyDef) {
 				$sqlKeyStatement .= ",\n";
 				$keyDef .= ")";
@@ -343,14 +344,14 @@ class MySQLDump {
 
 			}
 		}
-		if (is_array($index)) {
+		if (isset($index) && is_array($index)) {
 			foreach ($index as $keyName => $keyDef) {
 				$sqlKeyStatement .= ",\n";
 				$keyDef .= ")";
 				$sqlKeyStatement .= $keyDef;
 			}
 		}
-		if (is_array($fulltext)) {
+		if (isset($fulltext) && is_array($fulltext)) {
 			foreach ($fulltext as $keyName => $keyDef) {
 				$sqlKeyStatement .= ",\n";
 				$keyDef .= ")";
