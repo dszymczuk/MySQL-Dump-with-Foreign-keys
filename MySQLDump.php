@@ -160,7 +160,7 @@ class MySQLDump {
 
 		//Save table engine
 		$records = @mysql_query("SHOW TABLE STATUS LIKE '".$table."'");
-		echo $query;
+		// echo $query; - ???
 		if ( $record = @mysql_fetch_assoc($records) ) {
 			if ( !empty($record['Engine']) )
 				$structure .= ' ENGINE='.$record['Engine'];
@@ -219,8 +219,10 @@ class MySQLDump {
 				$data .= ' (';
 				for ($j = 0; $j < $num_fields; $j++) {
 					$field_name = @mysql_field_name($records, $j);
-					if ( $hexField[$j] && (@strlen($record[$field_name]) > 0) )
+					if ( isset($hexField[$j]) && $hexField[$j] && (@strlen($record[$field_name]) > 0) )
 						$data .= "0x".$record[$field_name];
+					else if ( is_null($record[$field_name]) )
+						$data .= "NULL";
 					else
 						$data .= "'".@str_replace('\"','"',@mysql_escape_string($record[$field_name]))."'";
 					$data .= ',';
@@ -228,7 +230,7 @@ class MySQLDump {
 				$data = @substr($data,0,-1).")";
 				$data .= ( $i < ($num_rows-1) ) ? ',' : ';';
 				$data .= "\n";
-				//if data in greather than 1MB save
+				//if data in greater than 1MB save
 				if (strlen($data) > 1048576) {
 					$this->saveToFile($this->file,$data);
 					$data = '';
@@ -247,6 +249,7 @@ class MySQLDump {
 		$records = @mysql_query('SHOW TABLES');
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
+		$structure = '';
 		while ( $record = @mysql_fetch_row($records) ) {
 			$structure .= $this->getTableStructure($record[0]);
 		}
@@ -269,10 +272,12 @@ class MySQLDump {
 	/**
 	* Writes to file the selected database dump
 	*/
-	function doDump() {
+	function doDump($params = array()) {
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 0;\n\n");
-		$this->getDatabaseStructure();
-		$this->getDatabaseData($this->hexValue);
+		if (!isset($params['skip_structure']))
+			$this->getDatabaseStructure();
+		if (!isset($params['skip_data']))
+			$this->getDatabaseData($this->hexValue);
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 1;\n\n");
 		$this->closeFile($this->file);
 		return true;
@@ -333,7 +338,7 @@ class MySQLDump {
 			$primary .= ")";
 			$sqlKeyStatement .= $primary;
 		}
-		if (is_array($unique)) {
+		if (isset($unique) && is_array($unique)) {
 			foreach ($unique as $keyName => $keyDef) {
 				$sqlKeyStatement .= ",\n";
 				$keyDef .= ")";
@@ -341,14 +346,14 @@ class MySQLDump {
 
 			}
 		}
-		if (is_array($index)) {
+		if (isset($index) && is_array($index)) {
 			foreach ($index as $keyName => $keyDef) {
 				$sqlKeyStatement .= ",\n";
 				$keyDef .= ")";
 				$sqlKeyStatement .= $keyDef;
 			}
 		}
-		if (is_array($fulltext)) {
+		if (isset($fulltext) && is_array($fulltext)) {
 			foreach ($fulltext as $keyName => $keyDef) {
 				$sqlKeyStatement .= ",\n";
 				$keyDef .= ")";
