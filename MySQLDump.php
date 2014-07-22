@@ -143,11 +143,15 @@ class MySQLDump {
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
 		while ( $record = mysql_fetch_assoc($records) ) {
+			$null = ' NULL';
 			$structure .= '`'.$record['Field'].'` '.$record['Type'];
-			if ( @strcmp($record['Null'],'YES') != 0 )
+			if ( @strcmp($record['Null'],'YES') != 0 ){
 				$structure .= ' NOT NULL';
+				$null = '';
+			}
+				
 			if ( !empty($record['Default']) || @strcmp($record['Null'],'YES') == 0) 
-				$structure .= ' DEFAULT '.(is_null($record['Default']) ? 'NULL' : "'{$record['Default']}'");
+				$structure .= $null.' DEFAULT '.(is_null($record['Default']) ? 'NULL' : (($record['Default'] == 'CURRENT_TIMESTAMP') ? "{$record['Default']}" : "'{$record['Default']}'"));
 			if ( !empty($record['Extra']) )
 				$structure .= ' '.$record['Extra'];
 			$structure .= ",\n";
