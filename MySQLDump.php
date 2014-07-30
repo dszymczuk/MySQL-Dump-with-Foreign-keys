@@ -232,12 +232,15 @@ class MySQLDump {
 					$data .= ',';
 				}
 				$data = @substr($data,0,-1).")";
-				$data .= ( $i < ($num_rows-1) ) ? ',' : ';';
-				$data .= "\n";
-				//if data in greater than 1MB save
-				if (strlen($data) > 1048576) {
+				
+				//if data in greater than 127KB save and add new INSERT
+				if (strlen($data) > 130000) {
+					$data .= ";\n";
 					$this->saveToFile($this->file,$data);
-					$data = '';
+					$data = $insertStatement;
+				}else{
+				    $data .= ( $i < ($num_rows-1) ) ? ',' : ';';
+				    $data .= "\n";
 				}
 			}
 			$data .= "\n-- --------------------------------------------------------\n\n";
