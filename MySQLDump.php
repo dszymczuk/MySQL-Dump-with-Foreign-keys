@@ -313,9 +313,9 @@ class MySQLDump {
 	*/
 	function getSqlKeysTable ($table) {
 		$primary = "";
-		unset($unique);
-		unset($index);
-		unset($fulltext);
+		$unique = array();
+		$index = array();
+		$fulltext = array();
 		$results = mysql_query("SHOW KEYS FROM `{$table}`");
 		if ( @mysql_num_rows($results) == 0 )
 			return false;
@@ -327,19 +327,19 @@ class MySQLDump {
 					$primary .= ", `{$row->Column_name}`";
 			}
 			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '0') AND ($row->Index_type == 'BTREE')) {
-				if ( (!is_array($unique)) OR ($unique[$row->Key_name]=="") )
+				if (!isset($unique[$row->Key_name]))
 					$unique[$row->Key_name] = "  UNIQUE KEY `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$unique[$row->Key_name] .= ", `{$row->Column_name}`";
 			}
 			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '1') AND ($row->Index_type == 'BTREE')) {
-				if ( (!is_array($index)) OR ($index[$row->Key_name]=="") )
+				if (!isset($index[$row->Key_name]))
 					$index[$row->Key_name] = "  KEY `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$index[$row->Key_name] .= ", `{$row->Column_name}`";
 			}
 			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '1') AND ($row->Index_type == 'FULLTEXT')) {
-				if ( (!is_array($fulltext)) OR ($fulltext[$row->Key_name]=="") )
+				if (!isset($fulltext[$row->Key_name]))
 					$fulltext[$row->Key_name] = "  FULLTEXT `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$fulltext[$row->Key_name] .= ", `{$row->Column_name}`";
@@ -352,27 +352,21 @@ class MySQLDump {
 			$primary .= ")";
 			$sqlKeyStatement .= $primary;
 		}
-		if (isset($unique) && is_array($unique)) {
-			foreach ($unique as $keyName => $keyDef) {
-				$sqlKeyStatement .= ",\n";
-				$keyDef .= ")";
-				$sqlKeyStatement .= $keyDef;
+		foreach ($unique as $keyName => $keyDef) {
+			$sqlKeyStatement .= ",\n";
+			$keyDef .= ")";
+			$sqlKeyStatement .= $keyDef;
 
-			}
 		}
-		if (isset($index) && is_array($index)) {
-			foreach ($index as $keyName => $keyDef) {
-				$sqlKeyStatement .= ",\n";
-				$keyDef .= ")";
-				$sqlKeyStatement .= $keyDef;
-			}
+		foreach ($index as $keyName => $keyDef) {
+			$sqlKeyStatement .= ",\n";
+			$keyDef .= ")";
+			$sqlKeyStatement .= $keyDef;
 		}
-		if (isset($fulltext) && is_array($fulltext)) {
-			foreach ($fulltext as $keyName => $keyDef) {
-				$sqlKeyStatement .= ",\n";
-				$keyDef .= ")";
-				$sqlKeyStatement .= $keyDef;
-			}
+		foreach ($fulltext as $keyName => $keyDef) {
+			$sqlKeyStatement .= ",\n";
+			$keyDef .= ")";
+			$sqlKeyStatement .= $keyDef;
 		}
 		return $sqlKeyStatement;
 	}
