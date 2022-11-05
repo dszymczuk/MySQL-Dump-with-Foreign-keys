@@ -43,8 +43,8 @@ class FKMySQLDump extends MySQLDump{
     * @param boolean $compress It defines if the output file is compress (gzip) or not
     * @param boolean $hexValue It defines if the output values are base-16 or not
     */
-    function FKMYSQLDump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
-        parent::MYSQLDump($db,$filepath,$compress,$hexValue);
+    function __construct($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
+        parent::__construct($db,$filepath,$compress,$hexValue);
         
         $this->_dbname = $db;
         $this->_fileName = parent::getOutputFile();
