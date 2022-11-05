@@ -16,7 +16,7 @@
 * @name    MySQLDump
 * @author  Daniele Viganň - CreativeFactory.it <daniele.vigano@creativefactory.it>
 *          Daniel Marschall - www.daniel-marschall.de (continued work in 2022)
-* @version 3.00 - 05/11/2022
+* @version 3.00 - 5 November 2022
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 */
 
@@ -24,29 +24,29 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-       protected $database = null;
+	protected $database = null;
 
 	/**
 	* @access private
 	*/
-	var $compress = false;
+	protected $compress = false;
 
 	/**
 	* @access private
 	*/
-	var $hexValue = false;
+	protected $hexValue = false;
 
   	/**
 	* The output filename
 	* @access private
 	*/
-	var $filename = null;
+	protected $filename = null;
 
 	/**
 	* The pointer of the output file
 	* @access private
 	*/
-	var $file = null;
+	protected $file = null;
 
 	/**
 	* @access private
@@ -71,7 +71,7 @@ class MySQLDump {
 	* Sets the database to work on
 	* @param string $db The database name
 	*/
-	function setDatabase($db){
+	public function setDatabase($db){
 		$this->database = $db;
 		if ( !@mysql_select_db($this->database) )
 			return false;
@@ -82,7 +82,7 @@ class MySQLDump {
 	* Returns the database where the class is working on
 	* @return string
 	*/
-	function getDatabase(){
+	public function getDatabase(){
 		return $this->database;
 	}
 
@@ -90,7 +90,7 @@ class MySQLDump {
 	* Sets the output file type (It can be made only if the file hasn't been already written)
 	* @param boolean $compress If it's true, the output file will be compressed
 	*/
-	function setCompress($compress){
+	public function setCompress($compress){
 		if ( $this->isWritten )
 			return false;
 		$this->compress = $compress;
@@ -102,7 +102,7 @@ class MySQLDump {
 	* Returns if the output file is or not compressed
 	* @return boolean
 	*/
-	function getCompress(){
+	public function getCompress(){
 		return $this->compress;
 	}
 
@@ -110,7 +110,7 @@ class MySQLDump {
 	* Sets the output file
 	* @param string $filepath The file where the dump will be written
 	*/
-	function setOutputFile($filepath){
+	public function setOutputFile($filepath){
 		if ( $this->isWritten )
 			return false;
 		$this->filename = $filepath;
@@ -122,7 +122,7 @@ class MySQLDump {
 	* Returns the output filename
 	* @return string
 	*/
-	function getOutputFile(){
+	public function getOutputFile(){
 		return $this->filename;
 	}
 
@@ -130,7 +130,7 @@ class MySQLDump {
 	* Writes to file the $table's structure
 	* @param string $table The table name
 	*/
-	function getTableStructure($table){
+	protected function getTableStructure($table){
 		if ( !$this->setDatabase($this->database) )
 			return false;
 		// Structure Header
@@ -182,7 +182,7 @@ class MySQLDump {
 	* @param string $table The table name
 	* @param boolean $hexValue It defines if the output is base 16 or not
 	*/
-	function getTableData($table,$hexValue = true) {
+	protected function getTableData($table,$hexValue = true) {
 		if ( !$this->setDatabase($this->database) )
 			return false;
 		// Header
@@ -253,7 +253,7 @@ class MySQLDump {
 	* Writes to file all the selected database tables structure
 	* @return boolean
 	*/
-	function getDatabaseStructure(){
+	protected function getDatabaseStructure(){
 		$records = @mysql_query('SHOW TABLES');
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
@@ -262,13 +262,13 @@ class MySQLDump {
 			$structure .= $this->getTableStructure($record[0]);
 		}
 		return true;
-  }
+	}
 
 	/**
 	* Writes to file all the selected database tables data
 	* @param boolean $hexValue It defines if the output is base-16 or not
 	*/
-	function getDatabaseData($hexValue = true){
+	protected function getDatabaseData($hexValue = true){
 		$records = @mysql_query('SHOW TABLES');
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
@@ -280,7 +280,7 @@ class MySQLDump {
 	/**
 	* Writes to file the selected database dump
 	*/
-	function doDump($params = array(), $close_file = true) {
+	public function doDump($params = array(), $close_file = true) {
 		$this->doDumpWithoutClosing($params);
 		if ($close_file) $this->closeFile($this->file);
 		return true;
@@ -301,7 +301,7 @@ class MySQLDump {
 	/**
 	* @deprecated Look at the doDump() method
 	*/
-	function writeDump($filename) {
+	public function writeDump($filename) {
 		if ( !$this->setOutputFile($filename) )
 			return false;
 		$this->doDump();
@@ -312,7 +312,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	function getSqlKeysTable ($table) {
+	protected function getSqlKeysTable ($table) {
 		$primary = "";
 		$unique = array();
 		$index = array();
@@ -375,7 +375,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	function isTextValue($field_type) {
+	protected function isTextValue($field_type) {
 		switch ($field_type) {
 			case "tinytext":
 			case "text":
@@ -396,7 +396,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	function openFile($filename) {
+	protected function openFile($filename) {
 		$file = false;
 		if ( $this->compress )
 			$file = @gzopen($filename, "w9");
@@ -408,7 +408,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	function saveToFile($file, $data) {
+	protected function saveToFile($file, $data) {
 		if ( $this->compress )
 			@gzwrite($file, $data);
 		else
@@ -419,7 +419,7 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-	function closeFile($file) {
+	protected function closeFile($file) {
 		if ( $this->compress )
 			@gzclose($file);
 		else
