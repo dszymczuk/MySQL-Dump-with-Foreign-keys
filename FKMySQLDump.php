@@ -20,19 +20,19 @@ class FKMySQLDump extends MySQLDump{
     
     /**
      * Database name
-     * @var type string
+     * @var string
      */
     private $_dbname;
     
     /**
      * Array of FK names
-     * @var type array
+     * @var array
      */
     private $_fk_names = array();
     
     /**
      * Name of file to wrtie
-     * @var type string
+     * @var string
      */
     private $_fileName;
     
