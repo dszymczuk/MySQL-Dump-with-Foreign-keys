@@ -1,12 +1,15 @@
 <?php
+
+include_once __DIR__.'/mysql_replacement.php';
+
 //MySQL connection parameters
 $dbhost = 'localhost';
-$dbuser = 'dynamic';
-$dbpsw = 'ppp';
-$dbname = 'dynamic';
+$dbuser = 'root';
+$dbpsw = '';
+$dbname = 'example';
 
 //Connects to mysql server
-$connessione = @mysql_connect($dbhost,$dbuser,$dbpsw);
+$connessione = mysql_connect($dbhost,$dbuser,$dbpsw);
 
 //Set encoding
 mysql_query("SET CHARSET utf8");
@@ -20,11 +23,9 @@ require_once('FKMySQLDump.php');
 $dumper = new MySQLDump($dbname,'fk_dump.sql',false,false);
 
 $params = array(
-	'skip_structure' => TRUE,
+	//'skip_structure' => TRUE,
 	//'skip_data' => TRUE,
 );
 
 //Make dump
 $dumper->doDump($params);
-
-?>
