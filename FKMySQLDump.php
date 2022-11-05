@@ -31,12 +31,6 @@ class FKMySQLDump extends MySQLDump{
     private $_fk_names = array();
     
     /**
-     * Name of file to wrtie
-     * @var string
-     */
-    private $_fileName;
-    
-    /**
     * Class constructor
     * @param string $db The database name
     * @param string $filepath The file where the dump will be written
@@ -47,7 +41,7 @@ class FKMySQLDump extends MySQLDump{
         parent::__construct($db,$filepath,$compress,$hexValue);
         
         $this->_dbname = $db;
-        $this->_fileName = parent::getOutputFile();
+        parent::getOutputFile();
     }
     
     /**
