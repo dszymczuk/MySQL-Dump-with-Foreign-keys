@@ -11,7 +11,7 @@
  * @author Damian Szymczuk - damian.szymczuk@gmail.com
  *         Daniel Marschall - www.daniel-marschall.de (continued work in 2022)
  * @link https://github.com/danielmarschall/MySQL-Dump-with-Foreign-keys
- * @version 3.00 - 05/11/2022
+ * @version 3.00 - 5 November 2022
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -50,7 +50,7 @@ class FKMySQLDump extends MySQLDump{
      * 
      * @return bool
      */
-    function doFKDump($params = array()) {
+    public function doFKDump($params = array()) {
         parent::doDumpWithoutClosing($params);
         $this->getForeignKeys();
         $sql_file  = "-- ------------\n";
