@@ -61,9 +61,10 @@ class MySQLDump {
 	*/
 	function __construct($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
 		$this->compress = $compress;
+		$this->hexValue = $hexValue;
 		if ( !$this->setOutputFile($filepath) )
 			return false;
-		return $this->setDatabase($db);
+		if (!$this->setDatabase($db)) throw new Exception("Set database failed");
 	}
 
 	/**
@@ -156,7 +157,7 @@ class MySQLDump {
 				$structure .= ' '.$record['Extra'];
 			$structure .= ",\n";
 		}
-		$structure = @preg_replace("@,\n$@", null, $structure);
+		$structure = @preg_replace("@,\n$@", "", $structure);
 
 		// Save all Column Indexes
 		$structure .= $this->getSqlKeysTable($table);
@@ -387,7 +388,6 @@ class MySQLDump {
 			case "mediumblob":
 			case "longblob":
 				return True;
-				break;
 			default:
 				return False;
 		}
