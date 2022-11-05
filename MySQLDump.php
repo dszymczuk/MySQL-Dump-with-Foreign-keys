@@ -20,8 +20,6 @@
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 */
 
-include_once __DIR__.'/mysql_replacement.php';
-
 class MySQLDump {
 	/**
 	* @access private
@@ -38,7 +36,7 @@ class MySQLDump {
 	*/
 	var $hexValue = false;
 
-  /**
+  	/**
 	* The output filename
 	* @access private
 	*/
@@ -78,13 +76,13 @@ class MySQLDump {
 		if ( !@mysql_select_db($this->database) )
 			return false;
 		return true;
-  }
+	}
 
 	/**
 	* Returns the database where the class is working on
 	* @return string
 	*/
-  function getDatabase(){
+	function getDatabase(){
 		return $this->database;
 	}
 
@@ -98,13 +96,13 @@ class MySQLDump {
 		$this->compress = $compress;
 		$this->openFile($this->filename);
 		return true;
-  }
+	}
 
 	/**
 	* Returns if the output file is or not compressed
 	* @return boolean
 	*/
-  function getCompress(){
+	function getCompress(){
 		return $this->compress;
 	}
 
@@ -118,13 +116,13 @@ class MySQLDump {
 		$this->filename = $filepath;
 		$this->file = $this->openFile($this->filename);
 		return $this->file;
-  }
+	}
 
-  /**
+	/**
 	* Returns the output filename
 	* @return string
 	*/
-  function getOutputFile(){
+	function getOutputFile(){
 		return $this->filename;
 	}
 
@@ -132,7 +130,7 @@ class MySQLDump {
 	* Writes to file the $table's structure
 	* @param string $table The table name
 	*/
-  function getTableStructure($table){
+	function getTableStructure($table){
 		if ( !$this->setDatabase($this->database) )
 			return false;
 		// Structure Header
@@ -251,7 +249,7 @@ class MySQLDump {
 		}
 	}
 
-  /**
+	/**
 	* Writes to file all the selected database tables structure
 	* @return boolean
 	*/
@@ -277,7 +275,7 @@ class MySQLDump {
 		while ( $record = @mysql_fetch_row($records) ) {
 			$this->getTableData($record[0],$hexValue);
 		}
-  }
+	}
 
 	/**
 	* Writes to file the selected database dump
@@ -307,8 +305,8 @@ class MySQLDump {
 		if ( !$this->setOutputFile($filename) )
 			return false;
 		$this->doDump();
-    $this->closeFile($this->file);
-    return true;
+		$this->closeFile($this->file);
+		return true;
 	}
 
 	/**
@@ -374,7 +372,7 @@ class MySQLDump {
 		return $sqlKeyStatement;
 	}
 
-  /**
+	/**
 	* @access private
 	*/
 	function isTextValue($field_type) {
@@ -407,7 +405,7 @@ class MySQLDump {
 		return $file;
 	}
 
-  /**
+	/**
 	* @access private
 	*/
 	function saveToFile($file, $data) {
@@ -418,7 +416,7 @@ class MySQLDump {
 		$this->isWritten = true;
 	}
 
-  /**
+	/**
 	* @access private
 	*/
 	function closeFile($file) {
@@ -428,4 +426,3 @@ class MySQLDump {
 			@fclose($file);
 	}
 }
-?>
