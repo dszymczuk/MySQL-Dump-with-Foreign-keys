@@ -55,8 +55,8 @@ class FKMySQLDump extends MySQLDump{
      * 
      * @return bool
      */
-    function doFKDump() {
-        parent::doDumpWithoutClosing();
+    function doFKDump($params = array()) {
+        parent::doDumpWithoutClosing($params);
         $this->getForeignKeys();
         $sql_file  = "-- ------------\n";
         $sql_file .= "-- FOREIGN KEYS\n";
