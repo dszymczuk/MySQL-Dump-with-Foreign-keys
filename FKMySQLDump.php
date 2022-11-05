@@ -9,12 +9,13 @@
  * 
  * @name FKMySQLDump
  * @author Damian Szymczuk - damian.szymczuk@gmail.com
- * @link http://dszymczuk.pl
- * @version 1.0 - 27/11/2011
+ *         Daniel Marschall - www.daniel-marschall.de (continued work in 2022)
+ * @link https://github.com/danielmarschall/MySQL-Dump-with-Foreign-keys
+ * @version 3.00 - 05/11/2022
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-require_once 'MySQLDump.php';
+require_once __DIR__.'/MySQLDump.php';
 
 class FKMySQLDump extends MySQLDump{
     
