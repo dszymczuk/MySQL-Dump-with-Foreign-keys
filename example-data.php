@@ -23,7 +23,7 @@ require_once('FKMySQLDump.php');
 $dumper = new MySQLDump($dbname,'fk_dump.sql',false,false);
 
 $params = array(
-	//'skip_structure' => TRUE,
+	'skip_structure' => TRUE,
 	//'skip_data' => TRUE,
 );
 
