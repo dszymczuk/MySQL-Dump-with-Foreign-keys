@@ -4,18 +4,23 @@ Simple class to dump your databse with foreign keys.
 
 No `exec` `passthru` etc needed.
 
+This fork fixes some bugs and is compatible with PHP 8.1
+
 Example usage:
 
 ```
 <?php
+
+include_once __DIR__.'/mysql_replacement.php';
+
 //MySQL connection parameters
 $dbhost = 'localhost';
-$dbuser = 'dbuser';
-$dbpsw = 'pass';
-$dbname = 'dbname';
+$dbuser = 'root';
+$dbpsw = '';
+$dbname = 'example';
 
 //Connects to mysql server
-$connessione = @mysql_connect($dbhost,$dbuser,$dbpsw);
+$connessione = mysql_connect($dbhost,$dbuser,$dbpsw);
 
 //Set encoding
 mysql_query("SET CHARSET utf8");
@@ -36,5 +41,4 @@ $params = array(
 //Make dump
 $dumper->doFKDump($params);
 
-?>
 ```
