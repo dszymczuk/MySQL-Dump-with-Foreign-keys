@@ -70,6 +70,7 @@ class MySQLDump {
 	/**
 	* Sets the database to work on
 	* @param string $db The database name
+	* @return boolean
 	*/
 	public function setDatabase($db){
 		$this->database = $db;
@@ -89,6 +90,7 @@ class MySQLDump {
 	/**
 	* Sets the output file type (It can be made only if the file hasn't been already written)
 	* @param boolean $compress If it's true, the output file will be compressed
+	* @return boolean
 	*/
 	public function setCompress($compress){
 		if ( $this->isWritten )
@@ -109,6 +111,7 @@ class MySQLDump {
 	/**
 	* Sets the output file
 	* @param string $filepath The file where the dump will be written
+	* @return resource|false
 	*/
 	public function setOutputFile($filepath){
 		if ( $this->isWritten )
@@ -129,6 +132,7 @@ class MySQLDump {
 	/**
 	* Writes to file the $table's structure
 	* @param string $table The table name
+	* @return boolean
 	*/
 	protected function getTableStructure($table){
 		if ( !$this->setDatabase($this->database) )
@@ -150,8 +154,8 @@ class MySQLDump {
 				$structure .= ' NOT NULL';
 				$null = '';
 			}
-				
-			if ( !empty($record['Default']) || @strcmp($record['Null'],'YES') == 0) 
+
+			if ( !empty($record['Default']) || @strcmp($record['Null'],'YES') == 0)
 				$structure .= $null.' DEFAULT '.(is_null($record['Default']) ? 'NULL' : (($record['Default'] == 'CURRENT_TIMESTAMP') ? "{$record['Default']}" : "'{$record['Default']}'"));
 			if ( !empty($record['Extra']) )
 				$structure .= ' '.$record['Extra'];
@@ -175,12 +179,14 @@ class MySQLDump {
 
 		$structure .= ";\n\n-- --------------------------------------------------------\n\n";
 		$this->saveToFile($this->file,$structure);
+		return true;
 	}
 
 	/**
 	* Writes to file the $table's data
 	* @param string $table The table name
 	* @param boolean $hexValue It defines if the output is base 16 or not
+	* @return boolean
 	*/
 	protected function getTableData($table,$hexValue = true) {
 		if ( !$this->setDatabase($this->database) )
@@ -233,7 +239,7 @@ class MySQLDump {
 					$data .= ',';
 				}
 				$data = @substr($data,0,-1).")";
-				
+
 				//if data in greater than 127KB save and add new INSERT
 				if (strlen($data) > 130000) {
 					$data .= ";\n";
@@ -247,6 +253,7 @@ class MySQLDump {
 			$data .= "\n-- --------------------------------------------------------\n\n";
 			$this->saveToFile($this->file,$data);
 		}
+		return true;
 	}
 
 	/**
@@ -267,6 +274,7 @@ class MySQLDump {
 	/**
 	* Writes to file all the selected database tables data
 	* @param boolean $hexValue It defines if the output is base-16 or not
+	* @return boolean
 	*/
 	protected function getDatabaseData($hexValue = true){
 		$records = @mysql_query('SHOW TABLES');
@@ -275,19 +283,22 @@ class MySQLDump {
 		while ( $record = @mysql_fetch_row($records) ) {
 			$this->getTableData($record[0],$hexValue);
 		}
+		return true;
 	}
 
 	/**
 	* Writes to file the selected database dump
+	* @return boolean
 	*/
 	public function doDump($params = array(), $close_file = true) {
-		$this->doDumpWithoutClosing($params);
+		$ok = $this->doDumpWithoutClosing($params);
 		if ($close_file) $this->closeFile($this->file);
-		return true;
+		return $ok;
 	}
-	
-	/**	
+
+	/**
 	* Writes to file the selected database dump
+	* @return boolean
 	*/
 	protected function doDumpWithoutClosing($params = array()) {
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 0;\n\n");
@@ -296,10 +307,12 @@ class MySQLDump {
 		if (!isset($params['skip_data']))
 			$this->getDatabaseData($this->hexValue);
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 1;\n\n");
+		return true;
 	}
-	
+
 	/**
 	* @deprecated Look at the doDump() method
+	* @return boolean
 	*/
 	public function writeDump($filename) {
 		if ( !$this->setOutputFile($filename) )
@@ -311,6 +324,7 @@ class MySQLDump {
 
 	/**
 	* @access private
+	* @return string|false
 	*/
 	protected function getSqlKeysTable ($table) {
 		$primary = "";
@@ -321,25 +335,25 @@ class MySQLDump {
 		if ( @mysql_num_rows($results) == 0 )
 			return false;
 		while($row = mysql_fetch_object($results)) {
-			if (($row->Key_name == 'PRIMARY') AND ($row->Index_type == 'BTREE')) {
+			if (($row->Key_name == 'PRIMARY') && ($row->Index_type == 'BTREE')) {
 				if ( $primary == "" )
 					$primary = "  PRIMARY KEY  (`{$row->Column_name}`";
 				else
 					$primary .= ", `{$row->Column_name}`";
 			}
-			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '0') AND ($row->Index_type == 'BTREE')) {
+			if (($row->Key_name != 'PRIMARY') && ($row->Non_unique == '0') && ($row->Index_type == 'BTREE')) {
 				if (!isset($unique[$row->Key_name]))
 					$unique[$row->Key_name] = "  UNIQUE KEY `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$unique[$row->Key_name] .= ", `{$row->Column_name}`";
 			}
-			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '1') AND ($row->Index_type == 'BTREE')) {
+			if (($row->Key_name != 'PRIMARY') && ($row->Non_unique == '1') && ($row->Index_type == 'BTREE')) {
 				if (!isset($index[$row->Key_name]))
 					$index[$row->Key_name] = "  KEY `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$index[$row->Key_name] .= ", `{$row->Column_name}`";
 			}
-			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '1') AND ($row->Index_type == 'FULLTEXT')) {
+			if (($row->Key_name != 'PRIMARY') && ($row->Non_unique == '1') && ($row->Index_type == 'FULLTEXT')) {
 				if (!isset($fulltext[$row->Key_name]))
 					$fulltext[$row->Key_name] = "  FULLTEXT `{$row->Key_name}` (`{$row->Column_name}`";
 				else
@@ -374,6 +388,7 @@ class MySQLDump {
 
 	/**
 	* @access private
+	* @return boolean
 	*/
 	protected function isTextValue($field_type) {
 		switch ($field_type) {
@@ -387,14 +402,15 @@ class MySQLDump {
 			case "blob":
 			case "mediumblob":
 			case "longblob":
-				return True;
+				return true;
 			default:
-				return False;
+				return false;
 		}
 	}
-	
+
 	/**
 	* @access private
+	* @return resource
 	*/
 	protected function openFile($filename) {
 		$file = false;
@@ -402,22 +418,26 @@ class MySQLDump {
 			$file = @gzopen($filename, "w9");
 		else
 			$file = @fopen($filename, "w");
+		if ($file === false) throw new Exception("Reading '$filename' failed");
 		return $file;
 	}
 
 	/**
 	* @access private
+	* @return void
 	*/
 	protected function saveToFile($file, $data) {
 		if ( $this->compress )
-			@gzwrite($file, $data);
+			$ok = @gzwrite($file, $data) !== false;
 		else
-			@fwrite($file, $data);
+			$ok = @fwrite($file, $data) !== false;
+		if (!$ok) throw new Exception("Write to '$file' failed");
 		$this->isWritten = true;
 	}
 
 	/**
 	* @access private
+	* @return void
 	*/
 	protected function closeFile($file) {
 		if ( $this->compress )
