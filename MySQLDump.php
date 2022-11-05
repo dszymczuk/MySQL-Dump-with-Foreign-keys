@@ -15,9 +15,12 @@
 *
 * @name    MySQLDump
 * @author  Daniele Viganň - CreativeFactory.it <daniele.vigano@creativefactory.it>
-* @version 2.20 - 02/11/2007
+*          Daniel Marschall - www.daniel-marschall.de (continued work in 2022)
+* @version 3.00 - 05/11/2022
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 */
+
+include_once __DIR__.'/mysql_replacement.php';
 
 class MySQLDump {
 	/**
