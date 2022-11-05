@@ -59,7 +59,7 @@ class MySQLDump {
 	* @param boolean $compress It defines if the output file is compress (gzip) or not
 	* @param boolean $hexValue It defines if the outup values are base-16 or not
 	*/
-	function MYSQLDump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
+	function __construct($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
 		$this->compress = $compress;
 		if ( !$this->setOutputFile($filepath) )
 			return false;
@@ -156,7 +156,7 @@ class MySQLDump {
 				$structure .= ' '.$record['Extra'];
 			$structure .= ",\n";
 		}
-		$structure = @ereg_replace(",\n$", null, $structure);
+		$structure = @preg_replace("@,\n$@", null, $structure);
 
 		// Save all Column Indexes
 		$structure .= $this->getSqlKeysTable($table);
