@@ -62,8 +62,7 @@ class MySQLDump {
 	function __construct($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
 		$this->compress = $compress;
 		$this->hexValue = $hexValue;
-		if ( !$this->setOutputFile($filepath) )
-			return false;
+		if (!$this->setOutputFile($filepath)) throw new Exception("Set output file failed");
 		if (!$this->setDatabase($db)) throw new Exception("Set database failed");
 	}
 
