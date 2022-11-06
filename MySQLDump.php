@@ -15,7 +15,8 @@
 *
 * @name    MySQLDump
 * @author  Daniele Viganň - CreativeFactory.it <daniele.vigano@creativefactory.it>
-* @version 2.20 - 02/11/2007
+*          Daniel Marschall - www.daniel-marschall.de (continued work in 2022)
+* @version 3.00 - 5 November 2022
 * @license http://opensource.org/licenses/gpl-license.php GNU Public License
 */
 
@@ -23,29 +24,29 @@ class MySQLDump {
 	/**
 	* @access private
 	*/
-       protected $database = null;
+	protected $database = null;
 
 	/**
 	* @access private
 	*/
-	var $compress = false;
+	protected $compress = false;
 
 	/**
 	* @access private
 	*/
-	var $hexValue = false;
+	protected $hexValue = false;
 
-  /**
+  	/**
 	* The output filename
 	* @access private
 	*/
-	var $filename = null;
+	protected $filename = null;
 
 	/**
 	* The pointer of the output file
 	* @access private
 	*/
-	var $file = null;
+	protected $file = null;
 
 	/**
 	* @access private
@@ -59,77 +60,81 @@ class MySQLDump {
 	* @param boolean $compress It defines if the output file is compress (gzip) or not
 	* @param boolean $hexValue It defines if the outup values are base-16 or not
 	*/
-	function MYSQLDump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
+	function __construct($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
 		$this->compress = $compress;
-		if ( !$this->setOutputFile($filepath) )
-			return false;
-		return $this->setDatabase($db);
+		$this->hexValue = $hexValue;
+		if (!$this->setOutputFile($filepath)) throw new Exception("Set output file failed");
+		if (!$this->setDatabase($db)) throw new Exception("Set database failed");
 	}
 
 	/**
 	* Sets the database to work on
 	* @param string $db The database name
+	* @return boolean
 	*/
-	function setDatabase($db){
+	public function setDatabase($db){
 		$this->database = $db;
 		if ( !@mysql_select_db($this->database) )
 			return false;
 		return true;
-  }
+	}
 
 	/**
 	* Returns the database where the class is working on
 	* @return string
 	*/
-  function getDatabase(){
+	public function getDatabase(){
 		return $this->database;
 	}
 
 	/**
 	* Sets the output file type (It can be made only if the file hasn't been already written)
 	* @param boolean $compress If it's true, the output file will be compressed
+	* @return boolean
 	*/
-	function setCompress($compress){
+	public function setCompress($compress){
 		if ( $this->isWritten )
 			return false;
 		$this->compress = $compress;
 		$this->openFile($this->filename);
 		return true;
-  }
+	}
 
 	/**
 	* Returns if the output file is or not compressed
 	* @return boolean
 	*/
-  function getCompress(){
+	public function getCompress(){
 		return $this->compress;
 	}
 
 	/**
 	* Sets the output file
 	* @param string $filepath The file where the dump will be written
+	* @return resource|false
 	*/
-	function setOutputFile($filepath){
+	public function setOutputFile($filepath){
 		if ( $this->isWritten )
 			return false;
 		$this->filename = $filepath;
 		$this->file = $this->openFile($this->filename);
 		return $this->file;
-  }
+	}
 
-  /**
+	/**
 	* Returns the output filename
 	* @return string
 	*/
-  function getOutputFile(){
+	public function getOutputFile(){
 		return $this->filename;
 	}
 
 	/**
 	* Writes to file the $table's structure
 	* @param string $table The table name
+	* @return boolean
 	*/
-  function getTableStructure($table){
+	protected function getTableStructure($table){
 		if ( !$this->setDatabase($this->database) )
 			return false;
 		// Structure Header
@@ -149,14 +154,14 @@ class MySQLDump {
 				$structure .= ' NOT NULL';
 				$null = '';
 			}
-				
-			if ( !empty($record['Default']) || @strcmp($record['Null'],'YES') == 0) 
+
+			if ( !empty($record['Default']) || @strcmp($record['Null'],'YES') == 0)
 				$structure .= $null.' DEFAULT '.(is_null($record['Default']) ? 'NULL' : (($record['Default'] == 'CURRENT_TIMESTAMP') ? "{$record['Default']}" : "'{$record['Default']}'"));
 			if ( !empty($record['Extra']) )
 				$structure .= ' '.$record['Extra'];
 			$structure .= ",\n";
 		}
-		$structure = @ereg_replace(",\n$", null, $structure);
+		$structure = @preg_replace("@,\n$@", "", $structure);
 
 		// Save all Column Indexes
 		$structure .= $this->getSqlKeysTable($table);
@@ -174,14 +179,16 @@ class MySQLDump {
 
 		$structure .= ";\n\n-- --------------------------------------------------------\n\n";
 		$this->saveToFile($this->file,$structure);
+		return true;
 	}
 
 	/**
 	* Writes to file the $table's data
 	* @param string $table The table name
 	* @param boolean $hexValue It defines if the output is base 16 or not
+	* @return boolean
 	*/
-	function getTableData($table,$hexValue = true) {
+	protected function getTableData($table,$hexValue = true) {
 		if ( !$this->setDatabase($this->database) )
 			return false;
 		// Header
@@ -232,7 +239,7 @@ class MySQLDump {
 					$data .= ',';
 				}
 				$data = @substr($data,0,-1).")";
-				
+
 				//if data in greater than 127KB save and add new INSERT
 				if (strlen($data) > 130000) {
 					$data .= ";\n";
@@ -246,13 +253,14 @@ class MySQLDump {
 			$data .= "\n-- --------------------------------------------------------\n\n";
 			$this->saveToFile($this->file,$data);
 		}
+		return true;
 	}
 
-  /**
+	/**
 	* Writes to file all the selected database tables structure
 	* @return boolean
 	*/
-	function getDatabaseStructure(){
+	protected function getDatabaseStructure(){
 		$records = @mysql_query('SHOW TABLES');
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
@@ -261,85 +269,92 @@ class MySQLDump {
 			$structure .= $this->getTableStructure($record[0]);
 		}
 		return true;
-  }
+	}
 
 	/**
 	* Writes to file all the selected database tables data
 	* @param boolean $hexValue It defines if the output is base-16 or not
+	* @return boolean
 	*/
-	function getDatabaseData($hexValue = true){
+	protected function getDatabaseData($hexValue = true){
 		$records = @mysql_query('SHOW TABLES');
 		if ( @mysql_num_rows($records) == 0 )
 			return false;
 		while ( $record = @mysql_fetch_row($records) ) {
 			$this->getTableData($record[0],$hexValue);
 		}
-  }
+		return true;
+	}
 
 	/**
 	* Writes to file the selected database dump
+	* @return boolean
 	*/
-	function doDump($params = array(), $close_file = true) {
-		$this->doDumpWithoutClosing();
-		$this->closeFile($this->file);
-		return true;
+	public function doDump($params = array(), $close_file = true) {
+		$ok = $this->doDumpWithoutClosing($params);
+		if ($close_file) $this->closeFile($this->file);
+		return $ok;
 	}
-	
-	/**	
+
+	/**
 	* Writes to file the selected database dump
+	* @return boolean
 	*/
-	protected function doDumpWithoutClosing() {
+	protected function doDumpWithoutClosing($params = array()) {
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 0;\n\n");
 		if (!isset($params['skip_structure']))
 			$this->getDatabaseStructure();
 		if (!isset($params['skip_data']))
 			$this->getDatabaseData($this->hexValue);
 		$this->saveToFile($this->file,"SET FOREIGN_KEY_CHECKS = 1;\n\n");
+		return true;
 	}
-	
+
 	/**
 	* @deprecated Look at the doDump() method
+	* @return boolean
 	*/
-	function writeDump($filename) {
+	public function writeDump($filename) {
 		if ( !$this->setOutputFile($filename) )
 			return false;
 		$this->doDump();
-    $this->closeFile($this->file);
-    return true;
+		$this->closeFile($this->file);
+		return true;
 	}
 
 	/**
 	* @access private
+	* @return string|false
 	*/
-	function getSqlKeysTable ($table) {
+	protected function getSqlKeysTable ($table) {
 		$primary = "";
-		unset($unique);
-		unset($index);
-		unset($fulltext);
+		$unique = array();
+		$index = array();
+		$fulltext = array();
 		$results = mysql_query("SHOW KEYS FROM `{$table}`");
 		if ( @mysql_num_rows($results) == 0 )
 			return false;
 		while($row = mysql_fetch_object($results)) {
-			if (($row->Key_name == 'PRIMARY') AND ($row->Index_type == 'BTREE')) {
+			if (($row->Key_name == 'PRIMARY') && ($row->Index_type == 'BTREE')) {
 				if ( $primary == "" )
 					$primary = "  PRIMARY KEY  (`{$row->Column_name}`";
 				else
 					$primary .= ", `{$row->Column_name}`";
 			}
-			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '0') AND ($row->Index_type == 'BTREE')) {
-				if ( (!is_array($unique)) OR ($unique[$row->Key_name]=="") )
+			if (($row->Key_name != 'PRIMARY') && ($row->Non_unique == '0') && ($row->Index_type == 'BTREE')) {
+				if (!isset($unique[$row->Key_name]))
 					$unique[$row->Key_name] = "  UNIQUE KEY `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$unique[$row->Key_name] .= ", `{$row->Column_name}`";
 			}
-			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '1') AND ($row->Index_type == 'BTREE')) {
-				if ( (!is_array($index)) OR ($index[$row->Key_name]=="") )
+			if (($row->Key_name != 'PRIMARY') && ($row->Non_unique == '1') && ($row->Index_type == 'BTREE')) {
+				if (!isset($index[$row->Key_name]))
 					$index[$row->Key_name] = "  KEY `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$index[$row->Key_name] .= ", `{$row->Column_name}`";
 			}
-			if (($row->Key_name != 'PRIMARY') AND ($row->Non_unique == '1') AND ($row->Index_type == 'FULLTEXT')) {
-				if ( (!is_array($fulltext)) OR ($fulltext[$row->Key_name]=="") )
+			if (($row->Key_name != 'PRIMARY') && ($row->Non_unique == '1') && ($row->Index_type == 'FULLTEXT')) {
+				if (!isset($fulltext[$row->Key_name]))
 					$fulltext[$row->Key_name] = "  FULLTEXT `{$row->Key_name}` (`{$row->Column_name}`";
 				else
 					$fulltext[$row->Key_name] .= ", `{$row->Column_name}`";
@@ -352,35 +367,30 @@ class MySQLDump {
 			$primary .= ")";
 			$sqlKeyStatement .= $primary;
 		}
-		if (isset($unique) && is_array($unique)) {
-			foreach ($unique as $keyName => $keyDef) {
-				$sqlKeyStatement .= ",\n";
-				$keyDef .= ")";
-				$sqlKeyStatement .= $keyDef;
+		foreach ($unique as $keyName => $keyDef) {
+			$sqlKeyStatement .= ",\n";
+			$keyDef .= ")";
+			$sqlKeyStatement .= $keyDef;
 
-			}
 		}
-		if (isset($index) && is_array($index)) {
-			foreach ($index as $keyName => $keyDef) {
-				$sqlKeyStatement .= ",\n";
-				$keyDef .= ")";
-				$sqlKeyStatement .= $keyDef;
-			}
+		foreach ($index as $keyName => $keyDef) {
+			$sqlKeyStatement .= ",\n";
+			$keyDef .= ")";
+			$sqlKeyStatement .= $keyDef;
 		}
-		if (isset($fulltext) && is_array($fulltext)) {
-			foreach ($fulltext as $keyName => $keyDef) {
-				$sqlKeyStatement .= ",\n";
-				$keyDef .= ")";
-				$sqlKeyStatement .= $keyDef;
-			}
+		foreach ($fulltext as $keyName => $keyDef) {
+			$sqlKeyStatement .= ",\n";
+			$keyDef .= ")";
+			$sqlKeyStatement .= $keyDef;
 		}
 		return $sqlKeyStatement;
 	}
 
-  /**
+	/**
 	* @access private
+	* @return boolean
 	*/
-	function isTextValue($field_type) {
+	protected function isTextValue($field_type) {
 		switch ($field_type) {
 			case "tinytext":
 			case "text":
@@ -392,44 +402,47 @@ class MySQLDump {
 			case "blob":
 			case "mediumblob":
 			case "longblob":
-				return True;
-				break;
+				return true;
 			default:
-				return False;
+				return false;
 		}
 	}
-	
+
 	/**
 	* @access private
+	* @return resource
 	*/
-	function openFile($filename) {
+	protected function openFile($filename) {
 		$file = false;
 		if ( $this->compress )
 			$file = @gzopen($filename, "w9");
 		else
 			$file = @fopen($filename, "w");
+		if ($file === false) throw new Exception("Reading '$filename' failed");
 		return $file;
 	}
 
-  /**
+	/**
 	* @access private
+	* @return void
 	*/
-	function saveToFile($file, $data) {
+	protected function saveToFile($file, $data) {
 		if ( $this->compress )
-			@gzwrite($file, $data);
+			$ok = @gzwrite($file, $data) !== false;
 		else
-			@fwrite($file, $data);
+			$ok = @fwrite($file, $data) !== false;
+		if (!$ok) throw new Exception("Write to '$file' failed");
 		$this->isWritten = true;
 	}
 
-  /**
+	/**
 	* @access private
+	* @return void
 	*/
-	function closeFile($file) {
+	protected function closeFile($file) {
 		if ( $this->compress )
 			@gzclose($file);
 		else
 			@fclose($file);
 	}
 }
-?>

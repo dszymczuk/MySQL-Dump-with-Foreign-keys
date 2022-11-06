@@ -9,32 +9,27 @@
  * 
  * @name FKMySQLDump
  * @author Damian Szymczuk - damian.szymczuk@gmail.com
- * @link http://dszymczuk.pl
- * @version 1.0 - 27/11/2011
+ *         Daniel Marschall - www.daniel-marschall.de (continued work in 2022)
+ * @link https://github.com/danielmarschall/MySQL-Dump-with-Foreign-keys
+ * @version 3.00 - 5 November 2022
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-require_once 'MySQLDump.php';
+require_once __DIR__.'/MySQLDump.php';
 
 class FKMySQLDump extends MySQLDump{
     
     /**
      * Database name
-     * @var type string
+     * @var string
      */
     private $_dbname;
     
     /**
      * Array of FK names
-     * @var type array
+     * @var array
      */
     private $_fk_names = array();
-    
-    /**
-     * Name of file to wrtie
-     * @var type string
-     */
-    private $_fileName;
     
     /**
     * Class constructor
@@ -43,11 +38,11 @@ class FKMySQLDump extends MySQLDump{
     * @param boolean $compress It defines if the output file is compress (gzip) or not
     * @param boolean $hexValue It defines if the output values are base-16 or not
     */
-    function FKMYSQLDump($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
-        parent::MYSQLDump($db,$filepath,$compress,$hexValue);
+    function __construct($db = null, $filepath = 'dump.sql', $compress = false, $hexValue = false){
+        parent::__construct($db,$filepath,$compress,$hexValue);
         
         $this->_dbname = $db;
-        $this->_fileName = parent::getOutputFile();
+        parent::getOutputFile();
     }
     
     /**
@@ -55,8 +50,8 @@ class FKMySQLDump extends MySQLDump{
      * 
      * @return bool
      */
-    function doFKDump() {
-        parent::doDumpWithoutClosing();
+    public function doFKDump($params = array()) {
+        parent::doDumpWithoutClosing($params);
         $this->getForeignKeys();
         $sql_file  = "-- ------------\n";
         $sql_file .= "-- FOREIGN KEYS\n";

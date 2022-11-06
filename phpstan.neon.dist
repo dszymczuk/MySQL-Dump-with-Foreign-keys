@@ -1,0 +1,12 @@
+parameters:
+	level: 5
+	fileExtensions:
+		- php
+	paths:
+		- .
+	excludePaths:
+		analyseAndScan:
+			- .phpstan.tmp
+	tmpDir: .phpstan.tmp
+	ignoreErrors:
+		- '#is always (true|false)\.#'
